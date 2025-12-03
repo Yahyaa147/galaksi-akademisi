@@ -17,39 +17,29 @@
 
 ## 📖 Proje Hakkında
 
-**Galaksi Akademisi**, dijital okuryazarlığın temellerini atmak ve çocukların analitik düşünme becerilerini geliştirmek amacıyla tasarlanmış bir "EdTech" (Eğitim Teknolojileri) projesidir. 
+**Galaksi Akademisi**, dijital okuryazarlığın temellerini atmak ve çocukların analitik düşünme becerilerini geliştirmek amacıyla tasarlanmış bir "EdTech" (Eğitim Teknolojileri) projesidir.
 
 Proje, herhangi bir oyun motoru veya JavaScript framework'ü (React, Vue vb.) kullanılmadan, **%100 Saf (Vanilla) JavaScript** ile geliştirilmiştir. Bu tercih, projenin en düşük donanımlı cihazlarda bile yüksek performansla çalışmasını ve harici kütüphane bağımlılığı olmamasını sağlar.
 
-### 🎯 Temel Amaçlar
+### 🎯 Temel Kazanımlar
 *   **Algoritmik Düşünme:** Olayları mantıksal bir sıraya koyma (Sequencing).
-*   **Görsel Algı:** Matris ve örüntü tamamlama becerileri.
+*   **Görsel Algı:** Matris, şekil-zemin ilişkisi ve örüntü tamamlama.
 *   **Psikomotor Gelişim:** İnce motor becerilerini destekleyen Sürükle-Bırak mekanikleri.
 
 ---
 
-## 📸 Oyun İçi Görüntüler
+## 🧠 Oyun Modülleri ve İçerik
 
-Oyun, çocuk dostu arayüz prensipleri (büyük butonlar, canlı renkler, ikonografi) gözetilerek tasarlanmıştır.
+Oyun, Bloom Taksonomisi'nin kavrama basamaklarına uygun olarak 3 farklı modülden oluşur:
 
-| **Giriş ve Ana Menü** | **Görev Haritası** |
-|:---:|:---:|
-| <img src="assets/intro_screen.jpg" width="400" alt="Giriş Ekranı"> | <img src="assets/map_screen.jpg" width="400" alt="Harita Sistemi"> |
-| *Sade ve anlaşılır karşılama ekranı.* | *Seviye bazlı ilerleme ve kilit sistemi.* |
+### 1. 🎬 Hikaye Modu (Sıralama)
+Çocuğun önüne karışık olarak gelen olay kartlarını (Örn: Tohum -> Filiz -> Çiçek) mantıksal bir zaman çizelgesine göre sıralaması istenir. Bu modül, temel kodlama mantığı olan **"Sequence" (Sıralama)** becerisini ölçer.
 
-<br>
+### 2. 🧩 Zeka Modu (Mantık & Matris)
+BİLSEM sınavlarında sıkça sorulan "Matris" sorularının dijital halidir. 2x2 veya daha büyük ızgaralardaki şekil örüntülerini analiz ederek eksik parçayı bulmayı hedefler.
 
-| **Mod 1: Hikaye (Sıralama)** | **Mod 2: Zeka (Mantık)** |
-|:---:|:---:|
-| <img src="assets/game_story.jpg" width="400" alt="Hikaye Modu"> | <img src="assets/game_logic.jpg" width="400" alt="Zeka Modu"> |
-| *Olay kartlarını doğru sıraya dizme.* | *Eksik parçayı bularak matrisi tamamlama.* |
-
-<br>
-
-| **Mod 3: Sanat (Görsel Dikkat)** | **Başarı ve Geri Bildirim** |
-|:---:|:---:|
-| <img src="assets/game_art.jpg" width="400" alt="Sanat Modu"> | <img src="assets/success_modal.jpg" width="400" alt="Başarı Ekranı"> |
-| *Piksel tabanlı desen kopyalama.* | *Sesli ve görsel motivasyon sistemi.* |
+### 3. 🎨 Sanat Modu (Görsel Dikkat)
+Piksel tabanlı bir çizim oyunudur. Sol tarafta verilen renkli desenin aynısını, sağ taraftaki boş ızgaraya kodlaması (boyaması) istenir. Görsel dikkat ve uzamsal algıyı güçlendirir.
 
 ---
 
@@ -57,18 +47,44 @@ Oyun, çocuk dostu arayüz prensipleri (büyük butonlar, canlı renkler, ikonog
 
 Bu proje "Single File Component" mantığına benzer şekilde, ancak **Build Tool (Webpack/Vite) kullanmadan** optimize edilmiştir.
 
-### 1. Zero-Dependency (Sıfır Bağımlılık)
-Harici hiçbir kütüphane kullanılmamıştır. `index.html` dosyası tek başına tüm oyunu barındırır. Bu sayede kurulum gerektirmez ve USB bellek ile çevrimdışı çalışabilir.
+### ✅ Zero-Dependency (Sıfır Bağımlılık)
+Harici hiçbir kütüphane kullanılmamıştır. `index.html` dosyası tek başına tüm oyunu barındırır. Bu sayede kurulum gerektirmez, USB bellek ile taşınabilir ve internet olmadan çalışabilir.
 
-### 2. Web Audio API ile Ses Sentezi
-Oyunun dosya boyutunu küçültmek için `.mp3` veya `.wav` dosyaları kullanılmamıştır. Bunun yerine JavaScript'in **AudioContext API**'si kullanılarak ses dalgaları (Oscillator) kod ile dinamik olarak üretilmiştir.
+### ✅ Web Audio API ile Ses Sentezi
+Oyunun dosya boyutunu küçültmek için `.mp3` veya `.wav` dosyaları **kullanılmamıştır**. Bunun yerine JavaScript'in **AudioContext API**'si kullanılarak ses dalgaları (Oscillator) kod ile dinamik olarak üretilmiştir.
+
 ```javascript
-// Örnek: Kod ile üretilen yumuşak 'başarı' sesi
+// Örnek: Kod ile üretilen yumuşak 'başarı' sesi (Audio Synthesis)
 playSoft: (freq, type = 'sine') => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.frequency.value = freq; 
+    osc.frequency.value = freq;
     // Envelope (Zarf) tekniği ile sesi yumuşatma
     gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
     osc.start();
 }
+✅ Hibrit Sürükle-Bırak (Drag & Drop)
+
+Hem masaüstü (Mouse) hem de mobil (Touch) cihazlarda sorunsuz çalışması için mousedown yerine Pointer Events API kullanılarak evrensel bir sürükleme motoru yazılmıştır.
+🚀 Nasıl Çalıştırılır?
+
+Bu projeyi kendi bilgisayarınızda çalıştırmak için hiçbir kuruluma ihtiyacınız yoktur.
+
+    Bu depoyu (repository) indirin veya klonlayın.
+
+    index.html dosyasına çift tıklayın.
+
+    Oyun tarayıcınızda açılacaktır. Hepsi bu kadar!
+
+👨‍💻 Geliştirici ve Emeği Geçenler
+
+Bu proje, Samsun Üniversitesi bünyesinde geliştirilmiştir.
+Rol	İsim
+Geliştirici	Yahya Özden
+Mentör / Danışman	Dr. Öğr. Üyesi Nurettin Şenyer
+Mentör / Danışman	Dr. Öğr. Üyesi Ömer Durmuş
+<div align="center">
+
+✨ Eğer bu projeyi beğendiyseniz sağ üstteki "Star" ⭐ butonuna basmayı unutmayın!
+</div>
+```
