@@ -18,11 +18,6 @@
 </div>
 
 ---
-👨‍💻 Geliştirici ve Emeği Geçenler
-
-Bu proje, Samsun Üniversitesi bünyesinde, akademik bir proje kapsamında geliştirilmiştir.
-Geliştirici	
-Yahya Özden	
 
 ## 📖 Proje Hakkında
 
@@ -74,25 +69,46 @@ Bu proje, modern web teknolojilerinin sınırlarını zorlayarak **"Framework-Fr
 Proje, harici hiçbir kütüphaneye (jQuery, Bootstrap, React vb.) ihtiyaç duymaz. Tek bir `index.html` dosyası tüm oyunu, stilleri ve mantığı barındırır.
 *   **Avantajı:** Çok düşük dosya boyutu (<50KB), anında yüklenme süresi ve internet gerektirmeyen çalışma yapısı.
 
-### ✅ 2. Web Audio API ile Kod Tabanlı Ses Sentezi
-Oyunun boyutunu artırmamak için `.mp3` veya `.wav` dosyaları kullanılmamıştır. Bunun yerine JavaScript'in **AudioContext API**'si kullanılarak ses dalgaları kod ile üretilmiştir.
 
-```javascript
-/* Ses Motoru Örneği: Dosyasız Ses Üretimi */
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+### ✅ 2. Hibrit "Pointer Events" Sistemi
+Oyunun hem Akıllı Tahta (Dokunmatik) hem de Bilgisayar (Mouse) ile sorunsuz çalışması için `mousedown` veya `touchstart` yerine evrensel **Pointer Events API** kullanılmıştır. Bu sayede cihaz bağımsız bir deneyim sunulur.
 
-function playTone(freq, type = 'sine') {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+---
+
+## 🚀 Nasıl Çalıştırılır?
+
+Bu projeyi çalıştırmak için herhangi bir sunucu kurulumuna veya `npm install` komutuna ihtiyacınız yoktur.
+
+1.  Bu depoyu (repository) indirin veya klonlayın:
     
-    osc.frequency.value = freq; // Frekans (Nota)
-    osc.type = type;            // Dalga Tipi (Sine, Square vs.)
+    git clone https://github.com/yahyaa147/galaksi-akademisi.git
     
-    // Envelope (Zarf) Tekniği: Sesi yumuşatma
-    gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-    
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-}
+2.  Klasörün içindeki `index.html` dosyasına çift tıklayın.
+3.  Oyun varsayılan tarayıcınızda açılacaktır. Hepsi bu kadar!
+
+---
+
+## 👨‍💻 Geliştirici ve Emeği Geçenler
+
+Bu proje, **Samsun Üniversitesi** bünyesinde, akademik bir proje kapsamında geliştirilmiştir.
+
+| Rol | İsim | Bağlantı |
+| --- | --- | --- |
+| **Geliştirici** | **Yahya Özden** | [GitHub](https://github.com/yahyaa147) / [LinkedIn](https://www.linkedin.com/in/yahya-%C3%B6zden-806319359/) |
+| **Mentör / Danışman** | **Dr. Öğr. Üyesi Nurettin Şenyer** | Samsun Üniversitesi |
+| **Mentör / Danışman** | **Dr. Öğr. Üyesi Ömer Durmuş** | Samsun Üniversitesi |
+
+---
+
+<div align="center">
+
+### 🔗 İletişim ve Destek
+
+Bu projenin geliştirilme sürecini, teknik detaylarını ve hikayesini paylaştığım **LinkedIn gönderisine** aşağıdaki butondan ulaşabilir, yorum ve desteklerinizi iletebilirsiniz:
+
+[![LinkedIn Post](https://img.shields.io/badge/LinkedIn-Gönderiye%20Git-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/posts/yahya-%C3%B6zden-806319359_javascript-ve-ai-ile-e%C4%9Fitici-oyun-geli%C5%9Ftirme-activity-7402056807084650496-2KhK?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFk2xkYBSxTGin65zUoHF_zVU0Ju-Bb0ees)
+
+<br>
+Developed with ❤️ by Yahya Özden
+
+</div>
