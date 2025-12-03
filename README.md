@@ -3,12 +3,13 @@
 Okul öncesi (5-6 yaş) çocukların bilişsel gelişimini desteklemek amacıyla geliştirilmiş, BİLSEM müfredatından ilham alan interaktif web oyunu.
 
 ## 🎮 Oyunu Oyna (Live Demo)
-👉 **Oyunu denemek için tıkla:** [BURAYA GITHUB PAGES LINKINI YAPIŞTIR]
+👉 **Oyunu denemek için tıkla:** https://yahyaa147.github.io/galaksi-akademisi/
 
 ## 📺 Tanıtım Videosu
 Projeyi ve kod yapısını anlattığım videoyu izleyin:
 https://youtu.be/dNgb_fWWnCk
-Oyun Linki:https://yahyaa147.github.io/galaksi-akademisi/
+LinkedIn post: 
+https://www.linkedin.com/in/yahya-%C3%B6zden-806319359/
 
 *(Videoyu izlemek için resme tıklayın)*
 
