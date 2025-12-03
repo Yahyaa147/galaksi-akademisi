@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Galaksi Akademisi V5</title>
+    <style>
+        :root {
+            --bg-deep: #1a1a2e;
+            --bg-light: #16213e;
+            --accent: #e94560;
+            --secondary: #0f3460;
+            --text: #ffffff;
+            --success: #00b894;
+            --locked: #535c68;
+            --font: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0; padding: 0;
+            background: radial-gradient(circle at center, var(--bg-light), var(--bg-deep));
+            height: 100vh; overflow: hidden;
+            font-family: var(--font); color: var(--text);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* --- UI ÇERÇEVESİ --- */
+        #game-frame {
+            width: 100%; height: 100%; max-width: 900px; max-height: 700px;
+            position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+
+        /* Üst Bar */
+        .top-bar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; z-index: 100;
+            background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-icon { font-size: 1.5rem; cursor: pointer; opacity: 0.8; transition: 0.2s; }
+        .btn-icon:hover { opacity: 1; transform: scale(1.1); }
+
+        /* Ekranlar */
+        .screen {
+            position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transform: scale(0.95);
+            transition: all 0.4s ease-out;
+            padding: 20px;
+        }
+        .screen.active { opacity: 1; pointer-events: all; transform: scale(1); }
+
+        /* --- HARİTA TASARIMI --- */
+        .map-section {
+            width: 100%; max-width: 600px;
+            background: rgba(0,0,0,0.2); border-radius: 15px;
+            padding: 15px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .map-icon { font-size: 2.5rem; width: 60px; text-align: center; }
+        .map-path { display: flex; flex: 1; justify-content: space-around; position: relative; }
+        .map-path::before {
+            content: ''; position: absolute; top: 50%; left: 10%; width: 80%; height: 4px;
+            background: rgba(255,255,255,0.1); z-index: 0; transform: translateY(-50%);
+        }
+        
+        .level-node {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: var(--locked); color: rgba(255,255,255,0.5);
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; font-size: 1.2rem;
+            position: relative; z-index: 1; cursor: not-allowed;
+            border: 3px solid transparent; transition: all 0.3s;
+        }
+        .level-node.unlocked { background: var(--secondary); color: white; border-color: var(--accent); cursor: pointer; box-shadow: 0 0 15px var(--accent); }
+        .level-node.completed { background: var(--success); border-color: white; color: white; }
+        .level-node.unlocked:hover { transform: scale(1.1); }
+
+        /* --- OYUN 1: SÜRÜKLE BIRAK --- */
+        .drag-area { display: flex; gap: 15px; margin-bottom: 30px; }
+        .drop-box {
+            width: 90px; height: 90px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px;
+            display: flex; justify-content: center; align-items: center; font-size: 2.5rem;
+            background: rgba(255,255,255,0.05); transition: 0.3s;
+        }
+        .drop-box.highlight { background: rgba(233, 69, 96, 0.2); border-color: var(--accent); }
+        
+        .piece-pool { display: flex; gap: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; }
+        .draggable {
+            width: 80px; height: 80px; background: white; color: #333; border-radius: 10px;
+            display: flex; justify-content: center; align-items: center; font-size: 3rem;
+            cursor: grab; box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            touch-action: none;
+        }
+        .draggable.dragging { opacity: 0.5; transform: scale(1.1); }
+
+        /* --- OYUN 2: LOGIC GRID --- */
+        .logic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .logic-cell { width: 80px; height: 80px; background: white; color: #333; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; border-radius: 8px; }
+        .logic-cell.q { background: var(--accent); color: white; animation: pulse 1s infinite; }
+
+        /* --- OYUN 3: MOZAİK (PIXEL ART) --- */
+        .mosaic-container { display: flex; gap: 30px; align-items: center; }
+        .pixel-grid { display: grid; gap: 2px; background: #333; padding: 2px; border-radius: 5px; }
+        .pixel { width: 35px; height: 35px; background: #fff; cursor: pointer; }
+        .pixel.read-only { cursor: default; }
+        .palette { display: flex; gap: 10px; margin-top: 20px; }
+        .p-color { width: 40px; height: 40px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.2s; }
+        .p-color.selected { transform: scale(1.2); border-color: white; box-shadow: 0 0 10px white; }
+
+        /* MODAL */
+        .modal {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.9); display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 200;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div id="game-frame">
+    <!-- Üst Bar -->
+    <div class="top-bar">
+        <div class="btn-icon" onclick="App.goHome()">🏠 Ana Menü</div>
+        <div class="btn-icon" id="sound-btn" onclick="AudioSys.toggle()">🔊</div>
+    </div>
+
+    <!-- 1. GİRİŞ EKRANI -->
+    <div id="screen-intro" class="screen active">
+        <h1 style="font-size: 3rem; text-shadow: 0 0 20px var(--accent);">Galaksi Akademisi</h1>
+        <p style="color: #ccc;">Seviyeni Seç ve Maceraya Başla</p>
+        <button onclick="App.goMap()" style="padding: 15px 40px; font-size: 1.5rem; background: var(--accent); color: white; border: none; border-radius: 30px; cursor: pointer; margin-top: 20px;">Başla ▶</button>
+    </div>
+
+    <!-- 2. HARİTA EKRANI -->
+    <div id="screen-map" class="screen">
+        <h2 style="margin-bottom: 30px;">Görev Haritası</h2>
+        
+        <!-- Hikaye Yolu -->
+        <div class="map-section">
+            <div class="map-icon">🎬</div>
+            <div class="map-path">
+                <div id="story-1" class="level-node unlocked" onclick="App.play('story', 1)">1</div>
+                <div id="story-2" class="level-node locked" onclick="App.play('story', 2)">2</div>
+                <div id="story-3" class="level-node locked" onclick="App.play('story', 3)">3</div>
+            </div>
+        </div>
+
+        <!-- Zeka Yolu -->
+        <div class="map-section">
+            <div class="map-icon">🧩</div>
+            <div class="map-path">
+                <div id="logic-1" class="level-node unlocked" onclick="App.play('logic', 1)">1</div>
+                <div id="logic-2" class="level-node locked" onclick="App.play('logic', 2)">2</div>
+                <div id="logic-3" class="level-node locked" onclick="App.play('logic', 3)">3</div>
+            </div>
+        </div>
+
+        <!-- Sanat Yolu -->
+        <div class="map-section">
+            <div class="map-icon">🎨</div>
+            <div class="map-path">
+                <div id="art-1" class="level-node unlocked" onclick="App.play('art', 1)">1</div>
+                <div id="art-2" class="level-node locked" onclick="App.play('art', 2)">2</div>
+                <div id="art-3" class="level-node locked" onclick="App.play('art', 3)">3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OYUN 1: HİKAYE -->
+    <div id="game-story" class="screen">
+        <h2 id="story-title">Sıraya Diz</h2>
+        <div class="drag-area" id="story-slots"></div>
+        <div class="piece-pool" id="story-pool"></div>
+    </div>
+
+    <!-- OYUN 2: LOGIC -->
+    <div id="game-logic" class="screen">
+        <h2 id="logic-title">Eksik Parça Hangisi?</h2>
+        <div class="logic-grid" id="logic-board"></div>
+        <div class="piece-pool" id="logic-opts"></div>
+    </div>
+
+    <!-- OYUN 3: ART (MOZAİK) -->
+    <div id="game-art" class="screen">
+        <h2>Desenin Aynısını Yap</h2>
+        <div class="mosaic-container">
+            <div>
+                <small>Buna Bak</small>
+                <div id="mosaic-target" class="pixel-grid"></div>
+            </div>
+            <div style="font-size: 2rem;">👉</div>
+            <div>
+                <small>Buraya Çiz</small>
+                <div id="mosaic-player" class="pixel-grid"></div>
+            </div>
+        </div>
+        <div class="palette" id="art-palette"></div>
+        <button onclick="ArtGame.check()" style="margin-top: 20px; padding: 10px 30px; background: var(--success); color: white; border: none; border-radius: 10px; font-size: 1.2rem; cursor: pointer;">Kontrol Et ✔</button>
+    </div>
+
+    <!-- MODAL (BAŞARI) -->
+    <div id="modal-success" class="modal">
+        <div style="font-size: 6rem; animation: pulse 1s infinite;">🎉</div>
+        <h2>Harika İş!</h2>
+        <p>Seviye Tamamlandı</p>
+        <button onclick="App.completeLevel()" style="padding: 10px 30px; margin-top: 20px; font-size: 1.2rem; cursor:pointer;">Devam Et ➡</button>
+    </div>
+
+</div>
+
+<script>
+    /* --- SES SİSTEMİ (YUMUŞATILMIŞ) --- */
+    const AudioSys = {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        muted: false,
+        
+        toggle: () => {
+            AudioSys.muted = !AudioSys.muted;
+            document.getElementById('sound-btn').innerText = AudioSys.muted ? '🔇' : '🔊';
+        },
+
+        playSoft: (freq, type = 'sine') => {
+            if(AudioSys.muted) return;
+            if(AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume();
+            
+            const o = AudioSys.ctx.createOscillator();
+            const g = AudioSys.ctx.createGain();
+            
+            o.type = type;
+            o.frequency.value = freq;
+            
+            // Yumuşak ses zarfı (Envelope)
+            g.gain.setValueAtTime(0, AudioSys.ctx.currentTime);
+            g.gain.linearRampToValueAtTime(0.1, AudioSys.ctx.currentTime + 0.05); // Fade in
+            g.gain.exponentialRampToValueAtTime(0.001, AudioSys.ctx.currentTime + 0.5); // Fade out
+            
+            o.connect(g);
+            g.connect(AudioSys.ctx.destination);
+            
+            o.start();
+            o.stop(AudioSys.ctx.currentTime + 0.5);
+        },
+
+        win: () => {
+            AudioSys.playSoft(440); // La
+            setTimeout(() => AudioSys.playSoft(554), 150); // Do#
+            setTimeout(() => AudioSys.playSoft(659), 300); // Mi
+        },
+        
+        click: () => AudioSys.playSoft(300, 'triangle'),
+        error: () => AudioSys.playSoft(150, 'sine')
+    };
+
+    /* --- OYUN VERİLERİ --- */
+    const Levels = {
+        story: {
+            1: { seq: ['🌱','🌿','🌻'], decoys: [], title: 'Çiçek Büyüyor' },
+            2: { seq: ['🛁','🧼','🚿'], decoys: ['🍎'], title: 'Banyo Zamanı' },
+            3: { seq: ['🛒','🥚','🍳','😋'], decoys: ['🚗'], title: 'Yemek Hazırlığı' }
+        },
+        logic: {
+            1: { q: ['🔴','🔴','🔵','?'], a: '🔵', opts: ['🔴','🔵','🟢'] },
+            2: { q: ['🔺','🔻','🔺','?'], a: '🔻', opts: ['🔺','🔻','🟧'] },
+            3: { q: ['1️⃣','2️⃣','3️⃣','?'], a: '4️⃣', opts: ['4️⃣','5️⃣','1️⃣'] }
+        },
+        art: {
+            1: { size: 2, grid: [1,0,0,1], colors: ['#fff', '#e94560'] }, // 2x2 Çapraz
+            2: { size: 3, grid: [0,1,0, 1,1,1, 0,1,0], colors: ['#fff', '#00b894'] }, // 3x3 Artı
+            3: { size: 4, grid: [1,0,0,1, 0,1,1,0, 0,1,1,0, 1,0,0,1], colors: ['#fff', '#f9ca24'] } // 4x4 X
+        }
+    };
+
+    /* --- UYGULAMA YÖNETİMİ --- */
+    const App = {
+        currentType: '',
+        currentLvl: 1,
+        progress: { story: 1, logic: 1, art: 1 },
+
+        goHome: () => {
+            AudioSys.click();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-intro').classList.add('active');
+        },
+        
+        goMap: () => {
+            AudioSys.click();
+            App.updateMap();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-map').classList.add('active');
+        },
+
+        updateMap: () => {
+            ['story', 'logic', 'art'].forEach(type => {
+                for(let i=1; i<=3; i++) {
+                    const el = document.getElementById(`${type}-${i}`);
+                    el.className = 'level-node'; // Reset
+                    
+                    if(i < App.progress[type]) {
+                        el.classList.add('completed');
+                        el.innerHTML = '✔';
+                    } else if (i === App.progress[type]) {
+                        el.classList.add('unlocked');
+                        el.innerHTML = i;
+                    } else {
+                        el.classList.add('locked');
+                        el.innerHTML = '🔒';
+                    }
+                }
+            });
+        },
+
+        play: (type, lvl) => {
+            if(lvl > App.progress[type] && lvl !== 1) return; // Kilitli
+            
+            AudioSys.click();
+            App.currentType = type;
+            App.currentLvl = lvl;
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            if(type === 'story') StoryGame.init(lvl);
+            if(type === 'logic') LogicGame.init(lvl);
+            if(type === 'art') ArtGame.init(lvl);
+            
+            document.getElementById(`game-${type}`).classList.add('active');
+        },
+
+        completeLevel: () => {
+            document.getElementById('modal-success').style.display = 'none';
+            // İlerlemeyi kaydet
+            if(App.currentLvl === App.progress[App.currentType]) {
+                App.progress[App.currentType]++;
+            }
+            App.goMap();
+        }
+    };
+
+    /* --- HİKAYE OYUNU (DRAG DROP) --- */
+    const StoryGame = {
+        target: [],
+        current: [],
+        
+        init: (lvl) => {
+            const data = Levels.story[lvl];
+            StoryGame.target = data.seq;
+            StoryGame.current = new Array(data.seq.length).fill(null);
+            document.getElementById('story-title').innerText = data.title;
+
+            const slots = document.getElementById('story-slots');
+            const pool = document.getElementById('story-pool');
+            slots.innerHTML = ''; pool.innerHTML = '';
+
+            // Hedefler
+            data.seq.forEach((_, i) => {
+                let box = document.createElement('div');
+                box.className = 'drop-box';
+                box.dataset.idx = i;
+                slots.appendChild(box);
+            });
+
+            // Parçalar
+            [...data.seq, ...data.decoys].sort(()=>Math.random()-0.5).forEach(item => {
+                let p = document.createElement('div');
+                p.className = 'draggable';
+                p.innerText = item;
+                // Pointer Events (Mouse + Touch)
+                p.onpointerdown = StoryGame.dragStart;
+                pool.appendChild(p);
+            });
+        },
+
+        dragStart: (e) => {
+            const el = e.target;
+            const ghost = el.cloneNode(true);
+            const rect = el.getBoundingClientRect();
+            
+            ghost.style.position = 'fixed';
+            ghost.style.left = rect.left + 'px';
+            ghost.style.top = rect.top + 'px';
+            ghost.style.zIndex = 1000;
+            ghost.style.opacity = 0.8;
+            ghost.style.pointerEvents = 'none';
+            document.body.appendChild(ghost);
+            
+            el.style.opacity = 0;
+            AudioSys.click();
+
+            const move = (ev) => {
+                ghost.style.left = (ev.clientX - 40) + 'px';
+                ghost.style.top = (ev.clientY - 40) + 'px';
+                
+                // Highlight
+                document.querySelectorAll('.drop-box').forEach(b => b.classList.remove('highlight'));
+                const below = document.elementFromPoint(ev.clientX, ev.clientY);
+                const box = below?.closest('.drop-box');
+                if(box && !box.innerText) box.classList.add('highlight');
+            };
+
+            const up = (ev) => {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', up);
+                ghost.remove();
+
+                const below = document.elementFromPoint(ev.clientX, ev.clientY);
+                const box = below?.closest('.drop-box');
+
+                if(box && !box.innerText) {
+                    box.innerText = el.innerText;
+                    box.classList.remove('highlight');
+                    box.style.background = 'white';
+                    StoryGame.current[box.dataset.idx] = el.innerText;
+                    el.remove();
+                    StoryGame.check();
+                } else {
+                    el.style.opacity = 1; // Geri dön
+                }
+            };
+
+            document.addEventListener('pointermove', move);
+            document.addEventListener('pointerup', up);
+        },
+
+        check: () => {
+            if(!StoryGame.current.includes(null)) {
+                if(JSON.stringify(StoryGame.current) === JSON.stringify(StoryGame.target)) {
+                    AudioSys.win();
+                    setTimeout(() => document.getElementById('modal-success').style.display = 'flex', 500);
+                } else {
+                    AudioSys.error();
+                    // Basit reset yerine görsel feedback eklenebilir
+                    setTimeout(() => App.play('story', App.currentLvl), 1000);
+                }
+            }
+        }
+    };
+
+    /* --- LOGIC OYUNU --- */
+    const LogicGame = {
+        init: (lvl) => {
+            const data = Levels.logic[lvl];
+            const board = document.getElementById('logic-board');
+            const opts = document.getElementById('logic-opts');
+            board.innerHTML = ''; opts.innerHTML = '';
+
+            data.q.forEach(item => {
+                let d = document.createElement('div');
+                d.className = item === '?' ? 'logic-cell q' : 'logic-cell';
+                d.innerText = item;
+                board.appendChild(d);
+            });
+
+            data.opts.forEach(opt => {
+                let btn = document.createElement('div');
+                btn.className = 'draggable'; // Reuse class for style
+                btn.style.cursor = 'pointer';
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    if(opt === data.a) {
+                        AudioSys.win();
+                        document.getElementById('modal-success').style.display = 'flex';
+                    } else {
+                        AudioSys.error();
+                        btn.style.opacity = 0.5;
+                    }
+                };
+                opts.appendChild(btn);
+            });
+        }
+    };
+
+    /* --- ART OYUNU (MOZAİK) --- */
+    const ArtGame = {
+        userGrid: [],
+        targetGrid: [],
+        activeColor: '#fff',
+
+        init: (lvl) => {
+            const data = Levels.art[lvl];
+            ArtGame.targetGrid = data.grid;
+            ArtGame.userGrid = new Array(data.grid.length).fill(0); // 0 = index of first color
+            
+            const pBoard = document.getElementById('mosaic-player');
+            const tBoard = document.getElementById('mosaic-target');
+            const pal = document.getElementById('art-palette');
+            
+            pBoard.innerHTML = ''; tBoard.innerHTML = ''; pal.innerHTML = '';
+            
+            // Grid Style
+            const style = `repeat(${data.size}, 1fr)`;
+            pBoard.style.gridTemplateColumns = style;
+            tBoard.style.gridTemplateColumns = style;
+
+            // Target
+            data.grid.forEach(cIdx => {
+                let div = document.createElement('div');
+                div.className = 'pixel read-only';
+                div.style.background = data.colors[cIdx];
+                tBoard.appendChild(div);
+            });
+
+            // Player
+            data.grid.forEach((_, i) => {
+                let div = document.createElement('div');
+                div.className = 'pixel';
+                div.style.background = data.colors[0]; // Default white
+                div.onclick = function() {
+                    this.style.background = ArtGame.activeColor;
+                    ArtGame.userGrid[i] = data.colors.indexOf(ArtGame.activeColor);
+                    AudioSys.click();
+                };
+                pBoard.appendChild(div);
+            });
+
+            // Palette
+            data.colors.forEach(c => {
+                let d = document.createElement('div');
+                d.className = 'p-color';
+                d.style.background = c;
+                d.onclick = (e) => {
+                    document.querySelectorAll('.p-color').forEach(x => x.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    ArtGame.activeColor = c;
+                    AudioSys.click();
+                };
+                pal.appendChild(d);
+            });
+            pal.children[1].click(); // Select color
+        },
+
+        check: () => {
+            if(JSON.stringify(ArtGame.userGrid) === JSON.stringify(ArtGame.targetGrid)) {
+                AudioSys.win();
+                document.getElementById('modal-success').style.display = 'flex';
+            } else {
+                AudioSys.error();
+            }
+        }
+    };
+
+</script>
+</body>
+</html>
