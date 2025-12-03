@@ -8,6 +8,7 @@ Okul öncesi (5-6 yaş) çocukların bilişsel gelişimini desteklemek amacıyla
 ## 📺 Tanıtım Videosu
 Projeyi ve kod yapısını anlattığım videoyu izleyin:
 https://youtu.be/dNgb_fWWnCk
+Oyun Linki:https://yahyaa147.github.io/galaksi-akademisi/
 
 *(Videoyu izlemek için resme tıklayın)*
 
