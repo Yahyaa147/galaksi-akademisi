@@ -53,38 +53,37 @@ Harici hiçbir kütüphane kullanılmamıştır. `index.html` dosyası tek baş�
 ### ✅ Web Audio API ile Ses Sentezi
 Oyunun dosya boyutunu küçültmek için `.mp3` veya `.wav` dosyaları **kullanılmamıştır**. Bunun yerine JavaScript'in **AudioContext API**'si kullanılarak ses dalgaları (Oscillator) kod ile dinamik olarak üretilmiştir.
 
-```javascript
-// Örnek: Kod ile üretilen yumuşak 'başarı' sesi (Audio Synthesis)
-playSoft: (freq, type = 'sine') => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.frequency.value = freq;
-    // Envelope (Zarf) tekniği ile sesi yumuşatma
-    gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
-    osc.start();
-}
-✅ Hibrit Sürükle-Bırak (Drag & Drop)
+> **Teknik Not:** Ses motoru, `createOscillator()` ve `createGain()` metodlarını kullanarak Envelope (Zarf) tekniği ile yumuşak sesler üretir. Bu sayede tarayıcıda anlık ses sentezi yapılır.
 
-Hem masaüstü (Mouse) hem de mobil (Touch) cihazlarda sorunsuz çalışması için mousedown yerine Pointer Events API kullanılarak evrensel bir sürükleme motoru yazılmıştır.
-🚀 Nasıl Çalıştırılır?
+### ✅ Hibrit Sürükle-Bırak (Drag & Drop)
+Hem masaüstü (Mouse) hem de mobil (Touch) cihazlarda sorunsuz çalışması için `mousedown` yerine **Pointer Events API** kullanılarak evrensel bir sürükleme motoru yazılmıştır.
+
+---
+
+## 🚀 Nasıl Çalıştırılır?
 
 Bu projeyi kendi bilgisayarınızda çalıştırmak için hiçbir kuruluma ihtiyacınız yoktur.
 
-    Bu depoyu (repository) indirin veya klonlayın.
+1.  Bu depoyu (repository) indirin veya klonlayın.
+2.  `index.html` dosyasına çift tıklayın.
+3.  Oyun tarayıcınızda açılacaktır. Hepsi bu kadar!
 
-    index.html dosyasına çift tıklayın.
+---
 
-    Oyun tarayıcınızda açılacaktır. Hepsi bu kadar!
+## 👨‍💻 Geliştirici ve Emeği Geçenler
 
-👨‍💻 Geliştirici ve Emeği Geçenler
+Bu proje, **Samsun Üniversitesi** bünyesinde geliştirilmiştir.
 
-Bu proje, Samsun Üniversitesi bünyesinde geliştirilmiştir.
-Rol	İsim
-Geliştirici	Yahya Özden
-Mentör / Danışman	Dr. Öğr. Üyesi Nurettin Şenyer
-Mentör / Danışman	Dr. Öğr. Üyesi Ömer Durmuş
+| Rol | İsim |
+| --- | --- |
+| **Geliştirici** | [Yahya Özden](https://github.com/yahyaa147) |
+| **Mentör / Danışman** | Dr. Öğr. Üyesi Nurettin Şenyer |
+| **Mentör / Danışman** | Dr. Öğr. Üyesi Ömer Durmuş |
+
+---
+
 <div align="center">
 
-✨ Eğer bu projeyi beğendiyseniz sağ üstteki "Star" ⭐ butonuna basmayı unutmayın!
+**✨ Eğer bu projeyi beğendiyseniz sağ üstteki "Star" ⭐ butonuna basmayı unutmayın!**
+
 </div>
-```
